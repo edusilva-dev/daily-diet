@@ -19,7 +19,7 @@ declare module 'knex/types/tables' {
       name: string
       description: string
       date: string
-      inDiet: boolean
+      in_diet: boolean
     }
   }
 }

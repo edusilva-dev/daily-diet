@@ -7,8 +7,6 @@ export async function checkSessionIdExists(
 ) {
   const sessionId = request.cookies.sessionId
 
-  console.log(sessionId)
-
   if (!sessionId) {
     return reply.status(401).send({
       error: 'Unauthorized.',

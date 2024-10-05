@@ -10,7 +10,7 @@ export async function mealRoutes(app: FastifyInstance) {
     const createMealBodySchema = z.object({
       name: z.string(),
       description: z.string(),
-      date: z.string().date(),
+      date: z.coerce.date(),
       inDiet: z.boolean(),
     })
 
@@ -24,23 +24,62 @@ export async function mealRoutes(app: FastifyInstance) {
       id: crypto.randomUUID(),
       name,
       description,
-      date,
-      inDiet,
+      date: date.toISOString(),
+      in_diet: inDiet,
       user_id: user!.id,
     })
 
     reply.status(201).send()
   })
 
-  app.get(
-    '/meals',
-    { preHandler: [checkSessionIdExists] },
-    async (request, reply) => {
-      const { user } = request
+  app.get('/meals', async (request, reply) => {
+    const { user } = request
 
-      await knex('meals').where('user_id', user!.id)
+    const meals = await knex('meals').where('user_id', user!.id)
 
-      reply.status(201).send()
-    },
-  )
+    reply.status(200).send({ meals })
+  })
+
+  app.put('/meals/:mealId', async (request, reply) => {
+    const deleteMealBodySchema = z.object({
+      mealId: z.string().uuid(),
+    })
+
+    const updateMealBodySchema = z.object({
+      name: z.string().optional(),
+      description: z.string().optional(),
+      date: z.string().optional(),
+      inDiet: z.boolean().optional(),
+    })
+
+    const { mealId } = deleteMealBodySchema.parse(request.params)
+
+    const mealToUpdate = updateMealBodySchema.parse(request.body)
+
+    const { user } = request
+
+    await knex('meals')
+      .update(mealToUpdate)
+      .where('id', mealId)
+      .and.where('user_id', user!.id)
+
+    reply.status(200).send({ message: 'Updated successfully.' })
+  })
+
+  app.delete('/meals/:mealId', async (request, reply) => {
+    const deleteMealBodySchema = z.object({
+      mealId: z.string().uuid(),
+    })
+
+    const { mealId } = deleteMealBodySchema.parse(request.params)
+
+    const { user } = request
+
+    await knex('meals')
+      .delete()
+      .where('id', mealId)
+      .and.where('user_id', user!.id)
+
+    reply.status(200).send()
+  })
 }

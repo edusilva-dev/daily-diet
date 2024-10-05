@@ -29,7 +29,7 @@ export async function authRoutes(app: FastifyInstance) {
     reply.status(200).send()
   })
 
-  app.post('/logout', (request, reply) => {
+  app.delete('/logout', (request, reply) => {
     reply.setCookie('sessionId', '')
 
     reply.status(200).send()

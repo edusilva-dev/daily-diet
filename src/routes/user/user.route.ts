@@ -11,16 +11,12 @@ export async function userRoutes(app: FastifyInstance) {
       password: string(),
     })
 
-    let sessionId = request.cookies.sessionId
+    const sessionId = crypto.randomUUID()
 
-    if (!sessionId) {
-      sessionId = crypto.randomUUID()
-
-      reply.setCookie('sessionId', sessionId, {
-        path: '/',
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      })
-    }
+    reply.setCookie('sessionId', sessionId, {
+      path: '/',
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    })
 
     const { name, email, password } = createUserBodySchema.parse(request.body)
 
